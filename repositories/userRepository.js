@@ -36,9 +36,9 @@ class UserRepository {
               fullName,
               passwordHash,
               createdAt,
-            })
+            }),
           );
-        }
+        },
       );
     });
   }
