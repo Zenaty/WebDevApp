@@ -10,6 +10,7 @@ class YoutubeService {
     url.searchParams.set("type", "video");
     url.searchParams.set("maxResults", "10");
     url.searchParams.set("q", query);
+    url.searchParams.set("key", apiKey);
 
     const resp = await fetch(url, {
       headers: { Accept: "application/json" },
