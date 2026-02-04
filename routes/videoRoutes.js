@@ -15,4 +15,8 @@ router.post("/videos/favorites/:id/delete", requireAuth, (req, res) =>
   videoController.deleteFavorite(req, res),
 );
 
+router.get("/videos/favorites/json", requireAuth, (req, res) =>
+  videoController.favoritesJson(req, res),
+);
+
 module.exports = router;

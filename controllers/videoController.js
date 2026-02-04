@@ -1,6 +1,11 @@
 const youtubeService = require("../services/youtubeService");
 const favoriteRepo = require("../repositories/favoriteRepository");
 
+function wantsJson(req) {
+  const accept = req.headers.accept || "";
+  return accept.includes("application/json");
+}
+
 class VideoController {
   async show(req, res) {
     const q = (req.query.q || "").trim();
@@ -25,10 +30,18 @@ class VideoController {
     });
   }
 
+  // NEW: return favorites as JSON (for no-refresh UI updates)
+  async favoritesJson(req, res) {
+    const favorites = await favoriteRepo.listByUser(req.session.user.id);
+    return res.json({ ok: true, favorites });
+  }
+
   async addFavorite(req, res) {
     const { videoId, title, channelTitle, thumbnailUrl } = req.body;
 
     if (!videoId || !title) {
+      if (wantsJson(req))
+        return res.status(400).json({ ok: false, error: "Missing fields" });
       return res.redirect("/videos");
     }
 
@@ -40,18 +53,27 @@ class VideoController {
       thumbnailUrl,
     });
 
+    if (wantsJson(req)) {
+      return res.json({ ok: true });
+    }
+
     const redirectTo = req.body.redirectTo || "/videos";
-    res.redirect(redirectTo);
+    return res.redirect(redirectTo);
   }
 
   async deleteFavorite(req, res) {
     const favoriteId = req.params.id;
+
     await favoriteRepo.remove({
       userId: req.session.user.id,
       favoriteId,
     });
 
-    res.redirect("/videos");
+    if (wantsJson(req)) {
+      return res.json({ ok: true });
+    }
+
+    return res.redirect("/videos");
   }
 }
 
